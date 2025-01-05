@@ -24,7 +24,7 @@ const adminSlice = createSlice({
     },
     logoutSuccess(state) {
       state.loading = false;
-      state.adminData = [];
+      state.adminData = null;
     },
     updateUserSuccess(state, action) {
       state.loading = false;
@@ -101,5 +101,14 @@ export const addUser = (userData) => async (dispatch) => {
     dispatch(addUserSuccess(response.data.user));
   } catch (error) {
     console.error(error);
+  }
+};
+
+export const logoutAdmin = () => async (dispatch) => {
+  try {
+    await axios.post('http://localhost:4000/logout', {}, { withCredentials: true });
+    dispatch(logoutSuccess());
+  } catch (error) {
+    console.error('Logout error:', error);
   }
 };

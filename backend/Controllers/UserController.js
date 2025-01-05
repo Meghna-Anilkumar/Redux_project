@@ -89,7 +89,7 @@ const fetchUserData = async (req, res) => {
   };
   
 
-  const updateProfilePicture = async (req, res) => {
+  const updateUserProfile = async (req, res) => {
     try {
       const token = req.cookies.token;
       if (!token) return res.status(401).json({ error: "Access Denied" });
@@ -100,19 +100,30 @@ const fetchUserData = async (req, res) => {
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ error: "User not found" });
   
+     
+      if (req.body.username) {
+        user.username = req.body.username;
+      }
+      if (req.body.email) {
+        user.email = req.body.email;
+      }
+  
+   
       if (req.file) {
         if (user.profile) {
           fs.unlinkSync(path.join(__dirname, '..', user.profile));
         }
         user.profile = req.file.path;
       }
+  
       await user.save();
-      res.json({ success: true, profile: user.profile });
+      res.json({ success: true, user });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   };
 
+  
   const deleteProfilePicture = async (req, res) => {
     try {
       const token = req.cookies.token;
@@ -157,5 +168,5 @@ const fetchUserData = async (req, res) => {
 
 
 module.exports = {
-    signUp,login,fetchUserData,updateProfilePicture,deleteProfilePicture,logout
+    signUp,login,fetchUserData,updateUserProfile,deleteProfilePicture,logout
 }

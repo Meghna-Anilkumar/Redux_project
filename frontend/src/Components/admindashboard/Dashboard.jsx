@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAdminData, updateUser, deleteUser, addUser, logoutSuccess } from '../../../redux/Slice/AdminSlice';
+import { fetchAdminData, updateUser, deleteUser, addUser, logoutAdmin } from '../../../redux/Slice/AdminSlice';
 import EditUserModal from '../Modals/EditUserModal';
 import DeleteUserModal from '../Modals/DeleteUserModal';
 import AddUserModal from '../Modals/AddUserModal';
 import { useNavigate } from 'react-router-dom';
+
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logoutSuccess());
+    dispatch(logoutAdmin());
     navigate('/admin');
   };
 

@@ -1,8 +1,8 @@
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const UserController = require("../Controllers/UserController");
-const verifyToken = require("../Middlewares/userAuth");
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const UserController = require('../Controllers/UserController');
+const verifyToken = require('../Middlewares/userAuth');
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -17,11 +17,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/signup', upload.single('profile'), UserController.signUp);
-router.post('/login',UserController.login)
+router.post('/login', UserController.login);
 router.get('/fetchuserdata', verifyToken, UserController.fetchUserData);
-router.post('/updateProfilePicture', upload.single('profile'), UserController.updateProfilePicture);
-router.post('/deleteProfilePicture', UserController.deleteProfilePicture);
+router.post('/updateProfile', verifyToken, upload.single('profile'), UserController.updateUserProfile);
+router.post('/deleteProfilePicture', verifyToken, UserController.deleteProfilePicture);
 router.post('/logout', UserController.logout);
-
 
 module.exports = router;

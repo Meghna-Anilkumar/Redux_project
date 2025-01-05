@@ -4,16 +4,27 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import avatar from '../../assets/profile.png';
 import { fetchData } from '../../../redux/Slice/UserSlice';
+import Modal from '../Modals/UserDetails'; // Assuming you have a Modal component
 
 function UserProfile() {
   const dispatch = useDispatch();
   const { userData, loading, error } = useSelector((state) => state.user);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     dispatch(fetchData());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (userData) {
+      setUsername(userData.username);
+      setEmail(userData.email);
+    }
+  }, [userData]);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -25,28 +36,22 @@ function UserProfile() {
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-    
+  const handleSave = async () => {
     const formData = new FormData();
-    formData.append('profile', file);
+    formData.append('username', username);
+    formData.append('email', email);
+    if (file) {
+      formData.append('profile', file);
+    }
 
     try {
-      await axios.post('http://localhost:4000/updateProfilePicture', formData, { withCredentials: true });
+      await axios.post('http://localhost:4000/updateProfile', formData, { withCredentials: true });
       dispatch(fetchData()); // Refresh user data
+      setIsModalOpen(false);
       setFile(null);
       setPreview(null);
     } catch (error) {
-      console.error('Error uploading profile picture:', error);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await axios.post('http://localhost:4000/deleteProfilePicture', {}, { withCredentials: true });
-      dispatch(fetchData()); // Refresh user data
-    } catch (error) {
-      console.error('Error deleting profile picture:', error);
+      console.error('Error updating profile:', error);
     }
   };
 
@@ -76,37 +81,66 @@ function UserProfile() {
             <div className="flex-grow">
               <h2 className="text-2xl font-semibold">{userData?.username}</h2>
               <p className="text-gray-700">{userData?.email}</p>
-              <div className="mt-4 flex space-x-4">
+              <div className="mt-4">
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  onClick={() => document.getElementById('fileInput').click()}
+                  onClick={() => setIsModalOpen(true)}
                 >
-                  Edit
-                </button>
-                <input
-                  type="file"
-                  id="fileInput"
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                />
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  onClick={handleUpload}
-                  disabled={!file}
-                >
-                  Save
-                </button>
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                  onClick={handleDelete}
-                >
-                  Delete
+                  Edit Profile
                 </button>
               </div>
             </div>
           </div>
         </div>
       </main>
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <div className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Profile Picture</label>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="w-full px-4 py-2 border rounded"
+              />
+              {preview && <img src={preview} alt="Preview" className="mt-4 w-24 h-24 rounded-full" />}
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                onClick={handleSave}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
